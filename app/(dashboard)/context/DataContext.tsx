@@ -64,7 +64,16 @@ interface DataContextType {
   electionScope: ElectionScope;
   setElectionScope: (scope: ElectionScope) => void;
   mutation: ReturnType<typeof useMutation>;
-  refetchAll: () => void;
+  refetchAll: () => Promise<void>;
+  refreshAll: () => Promise<void>;
+  myCenter: any | null;
+  centerDesks: any[];
+  centerStats: {
+    totalDesks: number;
+    maleDesksCount: number;
+    femaleDesksCount: number;
+  } | null;
+  loadingCenter: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -623,21 +632,60 @@ export function DataProvider({ children }: { children: ReactNode }) {
     memberWilayaQ.error ||
     memberCommuneQ.error;
 
-  const refetchAll = useCallback(() => {
-    void wilayasQ.refetch();
-    void communesQ.refetch();
-    void centersQ.refetch();
-    void desksQ.refetch();
-    void partiesQ.refetch();
-    void candidatsQ.refetch();
-    void adminsQ.refetch();
-    void membersQ.refetch();
-    void citizensQ.refetch();
-    void rolesQ.refetch();
-    void resultsQ.refetch();
+  const refetchAll = useCallback(async () => {
+    await Promise.all([
+      wilayasQ.refetch(),
+      communesQ.refetch(),
+      centersQ.refetch(),
+      desksQ.refetch(),
+      partiesQ.refetch(),
+      candidatsQ.refetch(),
+      adminsQ.refetch(),
+      membersQ.refetch(),
+      citizensQ.refetch(),
+      rolesQ.refetch(),
+      resultsQ.refetch(),
+    ]);
   }, [wilayasQ, communesQ, centersQ, desksQ, partiesQ, candidatsQ, adminsQ, membersQ, citizensQ, rolesQ, resultsQ]);
 
+  const refreshAll = refetchAll;
+
   const refetchSetter = useCallback((refetchFn: () => Promise<void>) => () => void refetchFn(), []);
+
+  const myCenter = React.useMemo(() => {
+    if (!user || user.role !== "role_election_day" || !user.center_id) return null;
+    if (!centersQ.data) return null;
+    const found = (centersQ.data as ICenter[]).find(
+      (c) => String(c._id || c.id) === String(user.center_id)
+    );
+    return found || null;
+  }, [user, centersQ.data]);
+
+  const centerDesks = React.useMemo(() => {
+    if (!myCenter) return [];
+    const myCenterId = String(myCenter._id || myCenter.id);
+    if (!desksQ.data) return [];
+    return (desksQ.data as IDesk[]).filter(
+      (d) => String(typeof d.center === "object" ? d.center?._id || d.center?.id : d.center) === myCenterId
+    );
+  }, [myCenter, desksQ.data]);
+
+  const centerStats = React.useMemo(() => {
+    if (!myCenter || centerDesks.length === 0) return null;
+    const totalDesks = centerDesks.length;
+    const maleDesksCount = centerDesks.filter((d) => d.type === "male").length;
+    const femaleDesksCount = centerDesks.filter((d) => d.type === "female").length;
+    return {
+      totalDesks,
+      maleDesksCount,
+      femaleDesksCount,
+    };
+  }, [myCenter, centerDesks]);
+
+  const loadingCenter = React.useMemo(() => {
+    if (!user || user.role !== "role_election_day") return false;
+    return centersQ.isLoading || desksQ.isLoading;
+  }, [user, centersQ.isLoading, desksQ.isLoading]);
 
   return (
     <DataContext.Provider
@@ -672,6 +720,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setElectionScope,
         mutation,
         refetchAll,
+        refreshAll,
+        myCenter,
+        centerDesks,
+        centerStats,
+        loadingCenter,
       }}
     >
       {children}

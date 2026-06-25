@@ -3,7 +3,7 @@ import type { AuthUser, AdminRole, UserRole } from "./types";
 export const DASHBOARD_ADMIN_ROLES: AdminRole[] = ["super_admin", "admin_wilaya", "admin_commun"];
 
 /** Roles allowed to open the dashboard after login */
-export const DASHBOARD_ROLES: UserRole[] = [...DASHBOARD_ADMIN_ROLES, "member_actif"];
+export const DASHBOARD_ROLES: UserRole[] = [...DASHBOARD_ADMIN_ROLES, "member_actif", "role_election_day"];
 
 function refId(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -32,6 +32,8 @@ export function normalizeAuthUser(raw: Record<string, unknown> | null | undefine
     status: raw.status ? String(raw.status) : undefined,
     date_of_birth: raw.date_of_birth ? String(raw.date_of_birth) : undefined,
     goal: raw.goal ? String(raw.goal) : undefined,
+    center_id: raw.center_id ? String(raw.center_id) : refId(raw.center),
+    desk_id: raw.desk_id ? String(raw.desk_id) : refId(raw.desk),
   };
 }
 

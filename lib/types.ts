@@ -43,6 +43,8 @@ export interface AuthUser {
   status?: string;
   date_of_birth?: string;
   goal?: string;
+  center_id?: string;
+  desk_id?: string;
 }
 
 export interface LoginRequest {
