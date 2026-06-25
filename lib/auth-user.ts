@@ -15,7 +15,15 @@ function refId(value: unknown): string | undefined {
 
 export function normalizeAuthUser(raw: Record<string, unknown> | null | undefined): AuthUser | null {
   if (!raw) return null;
-  const role = raw.role as AuthUser["role"];
+  let role = raw.role as AuthUser["role"];
+  let election_role = raw.election_role ? String(raw.election_role) : undefined;
+
+  const ELECTION_DAY_ROLES = ["chef_centre", "observateur_bureau", "observateur_centre", "scrutateur"];
+  if (role && ELECTION_DAY_ROLES.includes(role)) {
+    election_role = role;
+    role = "role_election_day";
+  }
+
   if (!role || !DASHBOARD_ROLES.includes(role)) return null;
 
   return {
@@ -34,6 +42,7 @@ export function normalizeAuthUser(raw: Record<string, unknown> | null | undefine
     goal: raw.goal ? String(raw.goal) : undefined,
     center_id: raw.center_id ? String(raw.center_id) : refId(raw.center),
     desk_id: raw.desk_id ? String(raw.desk_id) : refId(raw.desk),
+    election_role,
   };
 }
 

@@ -45,6 +45,7 @@ export interface AuthUser {
   goal?: string;
   center_id?: string;
   desk_id?: string;
+  election_role?: string;
 }
 
 export interface LoginRequest {

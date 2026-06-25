@@ -20,7 +20,6 @@ import { useQuery, useMutation } from "@/lib/hooks/useApi";
 import { api } from "@/lib/api";
 import type { IParty, ICandidat } from "@/lib/types";
 import Modal from "../components/Modal";
-import { isCentre } from "@/lib/auth-user";
 import { useData } from "../context/DataContext";
 
 type VoteEntry = Record<string, number>; // candidat_id → votes
