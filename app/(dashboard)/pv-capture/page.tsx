@@ -26,7 +26,7 @@ import { useData } from "../context/DataContext";
 export default function PVCapturePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { refreshAll } = useData();
+  const { refetchAll: refreshAll } = useData();
   const router = useRouter();
 
   const [stream, setStream] = useState<MediaStream | null>(null);
