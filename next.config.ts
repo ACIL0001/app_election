@@ -26,7 +26,25 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // Log all fetch() calls with timing in dev (shows API bottlenecks)
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
+
+  // Remove console.log in production builds
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
+
+  // Optimize images — serve WebP/AVIF automatically
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+
   async rewrites() {
+
     return [
       {
         source: "/api/:path*",
