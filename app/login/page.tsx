@@ -56,6 +56,7 @@ export default function LoginPage() {
             width={128}
             height={128}
             priority
+            fetchPriority="high"
             className="object-contain mx-auto mb-4"
           />
           <h1
